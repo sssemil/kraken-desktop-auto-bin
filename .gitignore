@@ -6,3 +6,7 @@
 !PKGBUILD
 !.SRCINFO
 !kraken.png
+!update.sh
+!.github/
+!.github/workflows/
+!.github/workflows/update-aur.yml

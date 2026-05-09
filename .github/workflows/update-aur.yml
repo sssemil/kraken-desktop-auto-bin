@@ -1,0 +1,75 @@
+name: Update AUR Package
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force update even if version unchanged'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq binutils unzip curl
+
+      - name: Run update script
+        run: bash update.sh
+
+      - name: Check for changes
+        id: diff
+        run: |
+          git add PKGBUILD .SRCINFO
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes detected."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            VER=$(grep -oP '^pkgver=\K.*' PKGBUILD)
+            echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update to v${VERSION}"
+          git push
+        env:
+          VERSION: ${{ steps.diff.outputs.version }}
+
+      # ------------------------------------------------------------------
+      # OPTIONAL: Push directly to AUR (aur.archlinux.org)
+      # Uncomment and configure these steps if you want fully automatic AUR updates.
+      #
+      # Prerequisites:
+      #   1. Add your AUR SSH private key as a GitHub secret named AUR_SSH_KEY
+      #   2. Make sure your AUR user's public key is uploaded to aur.archlinux.org
+      #   3. The AUR git remote URL is: ssh://aur@aur.archlinux.org/kraken-desktop.git
+      #
+      # - name: Push to AUR
+      #   if: steps.diff.outputs.changed == 'true'
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
+      #     chmod 600 ~/.ssh/aur_key
+      #     git remote add aur ssh://aur@aur.archlinux.org/kraken-desktop.git
+      #     GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=accept-new" \
+      #       git push aur HEAD:master
+      # ------------------------------------------------------------------
