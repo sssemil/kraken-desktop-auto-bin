@@ -56,10 +56,19 @@ jobs:
 
       - name: Push to AUR
         if: steps.diff.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.diff.outputs.version }}
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
           chmod 600 ~/.ssh/aur_key
-          git remote add aur-push ssh://aur@aur.archlinux.org/kraken-desktop-auto-bin.git
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=accept-new" \
-            git push aur-push HEAD:master
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=accept-new"
+          TMP_AUR=$(mktemp -d)
+          git clone --depth=1 ssh://aur@aur.archlinux.org/kraken-desktop-auto-bin.git "$TMP_AUR"
+          cp -f PKGBUILD .SRCINFO LICENSE kraken.png .gitignore "$TMP_AUR/"
+          cd "$TMP_AUR"
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update to v${VERSION}" || true
+          git push
