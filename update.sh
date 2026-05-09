@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PKGNAME="kraken_desktop"
+PKGNAME="kraken-desktop-auto-bin"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PKGBUILD="${SCRIPT_DIR}/PKGBUILD"
 SRCINFO="${SCRIPT_DIR}/.SRCINFO"
@@ -91,7 +91,7 @@ sed -i "s/^sha256sums_armv7=.*/sha256sums_armv7=('${sha_sums[armv7]}')/"     "$P
 msg "Generating .SRCINFO..."
 
 cat > "$SRCINFO" << SRCINFO_EOF
-pkgbase = kraken_desktop
+pkgbase = kraken-desktop-auto-bin
 	pkgdesc = Kraken crypto exchange desktop application
 	pkgver = ${latest_ver}
 	pkgrel = 1
@@ -101,19 +101,20 @@ pkgbase = kraken_desktop
 	arch = x86_64
 	license = custom: commercial
 	provides = kraken_desktop
+	conflicts = kraken_desktop
 	options = !debug
 	options = !lto
 	options = !strip
 	source = kraken.png
 	sha256sums = ${sha_icon}
-	source_aarch64 = kraken_desktop-${latest_ver}-aarch64.zip::https://desktop-downloads.kraken.com/latest/kraken-aarch64-unknown-linux-gnu.zip
+	source_aarch64 = kraken-desktop-auto-bin-${latest_ver}-aarch64.zip::https://desktop-downloads.kraken.com/latest/kraken-aarch64-unknown-linux-gnu.zip
 	sha256sums_aarch64 = ${sha_sums[aarch64]}
-	source_armv7 = kraken_desktop-${latest_ver}-armv7.zip::https://desktop-downloads.kraken.com/latest/kraken-armv7-unknown-linux-gnueabihf.zip
+	source_armv7 = kraken-desktop-auto-bin-${latest_ver}-armv7.zip::https://desktop-downloads.kraken.com/latest/kraken-armv7-unknown-linux-gnueabihf.zip
 	sha256sums_armv7 = ${sha_sums[armv7]}
-	source_x86_64 = kraken_desktop-${latest_ver}-x86_64.zip::https://desktop-downloads.kraken.com/latest/kraken-x86_64-unknown-linux-gnu.zip
+	source_x86_64 = kraken-desktop-auto-bin-${latest_ver}-x86_64.zip::https://desktop-downloads.kraken.com/latest/kraken-x86_64-unknown-linux-gnu.zip
 	sha256sums_x86_64 = ${sha_sums[x86_64]}
 
-pkgname = kraken_desktop
+pkgname = kraken-desktop-auto-bin
 SRCINFO_EOF
 
 msg ""

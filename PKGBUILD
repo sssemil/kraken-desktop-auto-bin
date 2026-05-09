@@ -1,5 +1,6 @@
-# Maintainer: Ergus <spacibba@aol.com>
-pkgname=kraken_desktop
+# Maintainer: sssemil <sssemil at github dot com>
+# Contributor: Ergus <spacibba at aol dot com>
+pkgname=kraken-desktop-auto-bin
 pkgver=1.16.0
 pkgrel=1
 pkgdesc="Kraken crypto exchange desktop application"
@@ -7,6 +8,7 @@ arch=('aarch64' 'armv7' 'x86_64')
 url="https://www.kraken.com/desktop"
 license=('custom: commercial')
 provides=('kraken_desktop')
+conflicts=('kraken_desktop')
 
 source=('kraken.png')
 

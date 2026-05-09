@@ -54,22 +54,12 @@ jobs:
         env:
           VERSION: ${{ steps.diff.outputs.version }}
 
-      # ------------------------------------------------------------------
-      # OPTIONAL: Push directly to AUR (aur.archlinux.org)
-      # Uncomment and configure these steps if you want fully automatic AUR updates.
-      #
-      # Prerequisites:
-      #   1. Add your AUR SSH private key as a GitHub secret named AUR_SSH_KEY
-      #   2. Make sure your AUR user's public key is uploaded to aur.archlinux.org
-      #   3. The AUR git remote URL is: ssh://aur@aur.archlinux.org/kraken-desktop.git
-      #
-      # - name: Push to AUR
-      #   if: steps.diff.outputs.changed == 'true'
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     echo "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
-      #     chmod 600 ~/.ssh/aur_key
-      #     git remote add aur ssh://aur@aur.archlinux.org/kraken-desktop.git
-      #     GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=accept-new" \
-      #       git push aur HEAD:master
-      # ------------------------------------------------------------------
+      - name: Push to AUR
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
+          chmod 600 ~/.ssh/aur_key
+          git remote add aur-push ssh://aur@aur.archlinux.org/kraken-desktop-auto-bin.git
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=accept-new" \
+            git push aur-push HEAD:master

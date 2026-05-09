@@ -6,6 +6,7 @@
 !PKGBUILD
 !.SRCINFO
 !kraken.png
+!LICENSE
 !update.sh
 !.github/
 !.github/workflows/
