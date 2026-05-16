@@ -33,19 +33,28 @@ jobs:
 
       - name: Check for changes
         id: diff
+        env:
+          FORCE_UPDATE: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}
         run: |
           git add PKGBUILD .SRCINFO
+          VER=$(grep -oP '^pkgver=\K.*' PKGBUILD)
+          echo "version=${VER}" >> "$GITHUB_OUTPUT"
           if git diff --cached --quiet; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No changes detected."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            if [ "${FORCE_UPDATE}" = "true" ]; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              echo "No package metadata changes detected; forcing AUR push."
+            else
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              echo "No changes detected."
+            fi
           else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            VER=$(grep -oP '^pkgver=\K.*' PKGBUILD)
-            echo "version=${VER}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Commit and push
-        if: steps.diff.outputs.changed == 'true'
+        if: steps.diff.outputs.has_changes == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
