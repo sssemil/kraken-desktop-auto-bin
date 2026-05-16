@@ -58,11 +58,17 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         env:
           VERSION: ${{ steps.diff.outputs.version }}
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
+          if [ -z "${AUR_SSH_KEY}" ]; then
+            echo "AUR_SSH_KEY secret is empty or missing." >&2
+            exit 1
+          fi
+          printf '%s\n' "${AUR_SSH_KEY}" > ~/.ssh/aur_key
           chmod 600 ~/.ssh/aur_key
-          export GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=accept-new"
+          ssh-keygen -y -f ~/.ssh/aur_key > /dev/null
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
           TMP_AUR=$(mktemp -d)
           git clone --depth=1 ssh://aur@aur.archlinux.org/kraken-desktop-auto-bin.git "$TMP_AUR"
           cp -f PKGBUILD .SRCINFO LICENSE kraken.png .gitignore "$TMP_AUR/"
