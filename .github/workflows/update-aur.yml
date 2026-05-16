@@ -68,7 +68,10 @@ jobs:
           printf '%s\n' "${AUR_SSH_KEY}" > ~/.ssh/aur_key
           chmod 600 ~/.ssh/aur_key
           ssh-keygen -y -f ~/.ssh/aur_key > /dev/null
+          echo "AUR deploy key fingerprint:"
+          ssh-keygen -lf ~/.ssh/aur_key
           export GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
+          ssh aur@aur.archlinux.org help > /dev/null
           TMP_AUR=$(mktemp -d)
           git clone --depth=1 ssh://aur@aur.archlinux.org/kraken-desktop-auto-bin.git "$TMP_AUR"
           cp -f PKGBUILD .SRCINFO LICENSE kraken.png .gitignore "$TMP_AUR/"
